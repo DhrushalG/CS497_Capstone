@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Model Metrics</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #fff;
+            padding: 20px;
+        }
+        
+        table {
+            width: 100%;
+            table-layout: fixed; /* Fixed table layout for consistent column widths */
+            border-collapse: collapse;
+            margin-top: 0px;
+            font-size: 15px; /* Reduced font size for overall table */
+        }
+        
+        th, td {
+            padding: 5px; /* Reduced padding */
+            text-align: center;
+            border: 0px solid #444;
+            overflow: hidden; /* Prevent overflow */
+            text-overflow: ellipsis; /* Truncate long text */
+        }
+        
+        th {
+            background-color: #333;
+            color: white;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        td {
+            background-color: #222;
+            color: white;
+        }
+        
+        tr:nth-child(even) td {
+            background-color: #2a2a2a;
+        }
+        
+        tr:hover {
+            background-color: #444;
+        }
+        
+        .metrics-header {
+            background-color: #2c3e50;
+            color: #fff;
+            font-size: 13px;
+            text-align: center;
+            text-transform: uppercase;
+        }
+        
+        .metrics-name, .metrics-values {
+            text-align: center;
+        }
+        
+        .metrics-name {
+            font-weight: bold;
+        }
+        
+        .metrics-values {
+            font-weight: normal;
+        }
+        th:nth-child(1), td:nth-child(1) {
+            width: 15%; /* Make the 3 middle columns narrower */
+        }
+        
+        /* Adjusting width for Precision, Recall, and F1-Score */
+        th:nth-child(2), td:nth-child(2),
+        th:nth-child(3), td:nth-child(3),
+        th:nth-child(4), td:nth-child(4) {
+            width: 15%; /* Make the 3 middle columns narrower */
+        }
+
+        /* Adjusting width for the Confusion Matrix column */
+        th:nth-child(5), td:nth-child(5) {
+            width: 20%; /* Make the Confusion Matrix column wider */
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Model Performance Metrics</h1>
+
+    <div id="metrics-container"></div>
+
+    <script>
+        // Define model data
+        const modelData = [
+    {
+        name: "SVM",
+        threshold: "Default",
+        confusionMatrix: "[[56862, 2], [52, 46]]",
+        precision: "0.96",
+        recall: "0.47",
+        f1: "0.63",
+        macroPrecision: "0.98",
+        macroRecall: "0.73",
+        macroF1: "0.81",
+        rocAuc: "0.96"
+    },
+    {
+        name: "SVM (Under-sampling)",
+        threshold: "Default",
+        confusionMatrix: "[[56850, 14], [44, 54]]",
+        precision: "0.79",
+        recall: "0.55",
+        f1: "0.65",
+        macroPrecision: "0.90",
+        macroRecall: "0.78",
+        macroF1: "0.83",
+        rocAuc: "0.97"
+    },
+    {
+        name: "RF",
+        threshold: "Default",
+        confusionMatrix: "[[56862, 2], [26, 72]]",
+        precision: "0.97",
+        recall: "0.73",
+        f1: "0.84",
+        macroPrecision: "0.99",
+        macroRecall: "0.87",
+        macroF1: "0.92",
+        rocAuc: "0.95"
+    },
+    {
+        name: "RF (Under-sampling)",
+        threshold: "Default",
+        confusionMatrix: "[[56858, 6], [19, 79]]",
+        precision: "0.93",
+        recall: "0.81",
+        f1: "0.86",
+        macroPrecision: "0.96",
+        macroRecall: "0.90",
+        macroF1: "0.93",
+        rocAuc: "0.97"
+    },
+    {
+        name: "FFNN",
+        threshold: "0.6",
+        confusionMatrix: "[[56857, 7], [19, 79]]",
+        precision: "0.92",
+        recall: "0.81",
+        f1: "0.86",
+        macroPrecision: "0.96",
+        macroRecall: "0.90",
+        macroF1: "0.93",
+        rocAuc: "0.98"
+    },
+    {
+        name: "CNN",
+        threshold: "0.6",
+        confusionMatrix: "[[56851, 13], [20, 78]]",
+        precision: "0.86",
+        recall: "0.80",
+        f1: "0.83",
+        macroPrecision: "0.93",
+        macroRecall: "0.90",
+        macroF1: "0.91",
+        rocAuc: "0.97"
+    },
+    {
+        name: "RF-CNN (.6)",
+        threshold: "0.6",
+        confusionMatrix: "[[56849, 15], [17, 81]]",
+        precision: "0.84",
+        recall: "0.83",
+        f1: "0.84",
+        macroPrecision: "0.92",
+        macroRecall: "0.91",
+        macroF1: "0.92",
+        rocAuc: "0.98"
+    },
+    {
+        name: "RF-CNN (.76)",
+        threshold: "0.76",
+        confusionMatrix: "[[56856, 8], [21, 77]]",
+        precision: "0.91",
+        recall: "0.79",
+        f1: "0.84",
+        macroPrecision: "0.95",
+        macroRecall: "0.89",
+        macroF1: "0.92",
+        rocAuc: "0.98"
+    },
+    {
+        name: "RF-CNN-LR (.14)",
+        threshold: "0.14",
+        confusionMatrix: "[[56858, 6], [16, 82]]",
+        precision: "0.93",
+        recall: "0.84",
+        f1: "0.88",
+        macroPrecision: "0.97",
+        macroRecall: "0.92",
+        macroF1: "0.94",
+        rocAuc: "0.98"
+    },
+    {
+        "name": "RF-CNN-LR (.46)",
+        "threshold": "0.46",
+        "confusionMatrix": "[[56860, 4], [17, 81]]",
+        "precision": "0.95",
+        "recall": "0.83",
+        "f1": "0.89",
+        "macroPrecision": "0.98",
+        "macroRecall": "0.91",
+        "macroF1": "0.94",
+        "rocAuc": "0.9865"
+    },
+    {
+        name: "RF-FFNN-LR (.3)",
+        threshold: "0.3",
+        confusionMatrix: "[[56860, 4], [18, 80]]",
+        precision: "0.95",
+        recall: "0.82",
+        f1: "0.88",
+        macroPrecision: "0.98",
+        macroRecall: "0.91",
+        macroF1: "0.94",
+        rocAuc: "0.99"
+    },
+    {
+        name: "RF-FFNN-LR (.85)",
+        threshold: "0.85",
+        confusionMatrix: "[[56862, 2], [20, 78]]",
+        precision: "0.97",
+        recall: "0.80",
+        f1: "0.88",
+        macroPrecision: "0.99",
+        macroRecall: "0.90",
+        macroF1: "0.94",
+        rocAuc: "0.99"
+    }
+];
+
+        function generateModelTable(model) {
+            const formattedConfusionMatrix = model.confusionMatrix
+                .split(",")
+                .reduce((acc, val, index) => {
+                    // Group values into rows for the table
+                    if (index % 2 === 0) acc.push([]);
+                    acc[acc.length - 1].push(val.trim());
+                    return acc;
+                }, [])
+                .map(row => row.join(" "))
+                .join("<br>");
+        
+            let tableHTML = `
+                <table>
+                    <thead>
+                        <tr class="metrics-header">
+                            <th>${model.name}</th>
+                            <th>Precision</th>
+                            <th>Recall</th>
+                            <th>F1-Score</th>
+                            <th>Conf. Matrix & ROC-AUC</th>
+                            <!-- <th>Threshold</th> -->
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Class 1 metrics row -->
+                        <tr>
+                            <td class="metrics-name">Class 1</td>
+                            <td class="metrics-values">${model.precision}</td>
+                            <td class="metrics-values">${model.recall}</td>
+                            <td class="metrics-values">${model.f1}</td>
+                            <td class="metrics-values">${formattedConfusionMatrix}</td>
+                            <!-- <td class="metrics-values">${model.threshold}</td> -->
+                        </tr>
+                        <!-- Macro average metrics row -->
+                        <tr>
+                            <td class="metrics-name">Macro Average</td>
+                            <td class="metrics-values">${model.macroPrecision}</td>
+                            <td class="metrics-values">${model.macroRecall}</td>
+                            <td class="metrics-values">${model.macroF1}</td>
+                            <td class="metrics-values">ROC-AUC: ${model.rocAuc}</td> <!-- Empty column for ROC-AUC -->
+                            <!-- <td class="metrics-values"></td> Empty column for Threshold -->
+                        </tr>
+                    </tbody>
+                </table>
+            `;
+            return tableHTML;
+        }
+
+// Generate and insert all tables
+let allTablesHTML = modelData.map(generateModelTable).join('');
+document.getElementById("metrics-container").innerHTML = allTablesHTML;
+    </script>
+
+</body>
+</html>
+
+
